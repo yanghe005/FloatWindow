@@ -1,6 +1,7 @@
 package com.yhao.floatwindow;
 
 import android.animation.TimeInterpolator;
+import android.app.Application;
 import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.MainThread;
@@ -19,6 +20,12 @@ import java.util.Map;
  */
 
 public class FloatWindow {
+
+    static FloatLifecycle floatLifecycle;
+
+    public static void initLifecycle(Application application){
+        floatLifecycle = new FloatLifecycle(application);
+    }
 
     private FloatWindow() {
 
