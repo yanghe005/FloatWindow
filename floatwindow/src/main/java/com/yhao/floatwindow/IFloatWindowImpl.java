@@ -140,8 +140,8 @@ public class IFloatWindowImpl extends IFloatWindow {
     public void updateX(int screenType, float ratio) {
         checkMoveType();
         mB.xOffset = (int) ((screenType == Screen.width ?
-                Util.getScreenWidth(mB.mApplicationContext) :
-                Util.getScreenHeight(mB.mApplicationContext)) * ratio);
+                Util.getDisplayWidth(mB.mApplicationContext) :
+                Util.getDisplayHeight(mB.mApplicationContext)) * ratio);
         mFloatView.updateX(mB.xOffset);
 
     }
@@ -150,8 +150,8 @@ public class IFloatWindowImpl extends IFloatWindow {
     public void updateY(int screenType, float ratio) {
         checkMoveType();
         mB.yOffset = (int) ((screenType == Screen.width ?
-                Util.getScreenWidth(mB.mApplicationContext) :
-                Util.getScreenHeight(mB.mApplicationContext)) * ratio);
+                Util.getDisplayWidth(mB.mApplicationContext) :
+                Util.getDisplayHeight(mB.mApplicationContext)) * ratio);
         mFloatView.updateY(mB.yOffset);
 
     }
@@ -207,6 +207,27 @@ public class IFloatWindowImpl extends IFloatWindow {
                                 changeY = event.getRawY() - lastY;
                                 newX = (int) (mFloatView.getX() + changeX);
                                 newY = (int) (mFloatView.getY() + changeY);
+                                //限制移动范围
+                                int startBarrier = mB.startMoveMargin;
+                                if (newX <= startBarrier) {
+                                    newX = startBarrier;
+                                }
+                                int screenWidth = Util.getDisplayWidth(mB.mApplicationContext);
+                                int endBarrier = screenWidth - mB.endMoveMargin - mB.mWidth;
+                                if (newX >= endBarrier) {
+                                    newX = endBarrier;
+                                }
+                                int topBarrier = mB.topMoveMargin;
+                                if (newY <= topBarrier) {
+                                    newY = topBarrier;
+                                }
+                                int bottomBarrier = Util.getDisplayHeight(mB.mApplicationContext)
+                                        - mB.mHeight - mB.bottomMoveMargin;
+                                //TODO:认为navBar一直显示(测试机上height=122)
+                                bottomBarrier -= Util.navBarHeight(mB.mApplicationContext);
+                                if (newY >= bottomBarrier) {
+                                    newY = bottomBarrier;
+                                }
                                 mFloatView.updateXY(newX, newY);
                                 if (mB.mViewStateListener != null) {
                                     mB.mViewStateListener.onPositionUpdate(newX, newY);
@@ -221,8 +242,8 @@ public class IFloatWindowImpl extends IFloatWindow {
                                 switch (mB.mMoveType) {
                                     case MoveType.slide:
                                         int startX = mFloatView.getX();
-                                        int endX = (startX * 2 + v.getWidth() > Util.getScreenWidth(mB.mApplicationContext)) ?
-                                                Util.getScreenWidth(mB.mApplicationContext) - v.getWidth() - mB.mSlideRightMargin :
+                                        int endX = (startX * 2 + v.getWidth() > Util.getDisplayWidth(mB.mApplicationContext)) ?
+                                                Util.getDisplayWidth(mB.mApplicationContext) - v.getWidth() - mB.mSlideRightMargin :
                                                 mB.mSlideLeftMargin;
                                         mAnimator = ObjectAnimator.ofInt(startX, endX);
                                         mAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {

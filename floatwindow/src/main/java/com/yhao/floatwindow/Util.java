@@ -1,17 +1,10 @@
 package com.yhao.floatwindow;
 
 import android.content.Context;
-import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Build;
-import android.provider.Settings;
-import android.support.annotation.RequiresApi;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 
-import java.lang.reflect.Method;
 
 /**
  * Created by yhao on 2017/12/22.
@@ -26,27 +19,25 @@ class Util {
         return inflate.inflate(layoutId, null);
     }
 
-    private static Point sPoint;
-
-    static int getScreenWidth(Context context) {
-        if (sPoint == null) {
-            sPoint = new Point();
-            WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-            wm.getDefaultDisplay().getSize(sPoint);
-        }
-        return sPoint.x;
+    static int getDisplayWidth(Context context) {
+        return context.getResources().getDisplayMetrics().widthPixels;
     }
 
-    static int getScreenHeight(Context context) {
-        if (sPoint == null) {
-            sPoint = new Point();
-            WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-            wm.getDefaultDisplay().getSize(sPoint);
-        }
-        return sPoint.y;
+    static int getDisplayHeight(Context context) {
+        return context.getResources().getDisplayMetrics().heightPixels;
     }
 
     static boolean isViewVisible(View view) {
         return view.getGlobalVisibleRect(new Rect());
+    }
+
+    public static int navBarHeight(Context context) {
+        int navigationHeight = 0;
+        int resourceId = context.getResources()
+                .getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            navigationHeight = context.getResources().getDimensionPixelSize(resourceId);
+        }
+        return navigationHeight;
     }
 }

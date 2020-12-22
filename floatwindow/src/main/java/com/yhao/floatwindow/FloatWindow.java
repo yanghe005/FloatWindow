@@ -74,6 +74,10 @@ public class FloatWindow {
         boolean mDesktopShow;
         PermissionListener mPermissionListener;
         ViewStateListener mViewStateListener;
+        int topMoveMargin = 0;
+        int bottomMoveMargin = 0;
+        int startMoveMargin = 0;
+        int endMoveMargin = 0;
 
         private B() {
 
@@ -105,16 +109,16 @@ public class FloatWindow {
 
         public B setWidth(@Screen.screenType int screenType, float ratio) {
             mWidth = (int) ((screenType == Screen.width ?
-                    Util.getScreenWidth(mApplicationContext) :
-                    Util.getScreenHeight(mApplicationContext)) * ratio);
+                    Util.getDisplayWidth(mApplicationContext) :
+                    Util.getDisplayHeight(mApplicationContext)) * ratio);
             return this;
         }
 
 
         public B setHeight(@Screen.screenType int screenType, float ratio) {
             mHeight = (int) ((screenType == Screen.width ?
-                    Util.getScreenWidth(mApplicationContext) :
-                    Util.getScreenHeight(mApplicationContext)) * ratio);
+                    Util.getDisplayWidth(mApplicationContext) :
+                    Util.getDisplayHeight(mApplicationContext)) * ratio);
             return this;
         }
 
@@ -131,15 +135,15 @@ public class FloatWindow {
 
         public B setX(@Screen.screenType int screenType, float ratio) {
             xOffset = (int) ((screenType == Screen.width ?
-                    Util.getScreenWidth(mApplicationContext) :
-                    Util.getScreenHeight(mApplicationContext)) * ratio);
+                    Util.getDisplayWidth(mApplicationContext) :
+                    Util.getDisplayHeight(mApplicationContext)) * ratio);
             return this;
         }
 
         public B setY(@Screen.screenType int screenType, float ratio) {
             yOffset = (int) ((screenType == Screen.width ?
-                    Util.getScreenWidth(mApplicationContext) :
-                    Util.getScreenHeight(mApplicationContext)) * ratio);
+                    Util.getDisplayWidth(mApplicationContext) :
+                    Util.getDisplayHeight(mApplicationContext)) * ratio);
             return this;
         }
 
@@ -178,6 +182,14 @@ public class FloatWindow {
         public B setMoveStyle(long duration, @Nullable TimeInterpolator interpolator) {
             mDuration = duration;
             mInterpolator = interpolator;
+            return this;
+        }
+
+        public B setMoveMargin(int topMoveMargin, int bottomMoveMargin, int startMoveMargin, int endMoveMargin) {
+            this.topMoveMargin = topMoveMargin;
+            this.bottomMoveMargin = bottomMoveMargin;
+            this.startMoveMargin = startMoveMargin;
+            this.endMoveMargin = endMoveMargin;
             return this;
         }
 
