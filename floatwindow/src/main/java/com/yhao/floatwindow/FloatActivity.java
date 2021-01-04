@@ -52,7 +52,7 @@ public class FloatActivity extends Activity {
         finish();
     }
 
-    static synchronized void request(Context context, PermissionListener permissionListener) {
+    public static synchronized void request(Context context, PermissionListener permissionListener) {
         if (PermissionUtil.hasPermission(context)) {
             permissionListener.onSuccess();
             return;
