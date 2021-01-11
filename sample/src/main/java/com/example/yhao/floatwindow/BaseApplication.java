@@ -1,7 +1,6 @@
 package com.example.yhao.floatwindow;
 
 import android.app.Application;
-import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.BounceInterpolator;
@@ -22,12 +21,13 @@ import com.yhao.floatwindow.ViewStateListener;
 
 public class BaseApplication extends Application {
 
-
-    private static final String TAG = "FloatWindow";
+    private static final String TAG = "BaseApplication";
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        FloatWindow.initLifecycle(this);
 
         ImageView imageView = new ImageView(getApplicationContext());
         imageView.setImageResource(R.drawable.icon);
