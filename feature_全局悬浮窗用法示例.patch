@@ -1,0 +1,440 @@
+Index: floatwindow/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- floatwindow/build.gradle	(revision 504876ca88cb4d839d6f13e4dcf47a7fa0cd05d0)
++++ floatwindow/build.gradle	(revision e0d91c238f7b42cff06390ca75dcf8238c51b8ec)
+@@ -20,7 +20,10 @@
+             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+         }
+     }
+-
++    compileOptions {
++        sourceCompatibility JavaVersion.VERSION_1_8
++        targetCompatibility JavaVersion.VERSION_1_8
++    }
+ }
+ 
+ dependencies {
+Index: floatwindow/src/main/java/com/yhao/floatwindow/FloatActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- floatwindow/src/main/java/com/yhao/floatwindow/FloatActivity.java	(revision 504876ca88cb4d839d6f13e4dcf47a7fa0cd05d0)
++++ floatwindow/src/main/java/com/yhao/floatwindow/FloatActivity.java	(revision e0d91c238f7b42cff06390ca75dcf8238c51b8ec)
+@@ -7,9 +7,8 @@
+ import android.os.Build;
+ import android.os.Bundle;
+ import android.provider.Settings;
++
+ import androidx.annotation.RequiresApi;
+-import java.util.ArrayList;
+-import java.util.List;
+ 
+ /**
+  * 用于在内部自动申请权限
+@@ -18,10 +17,9 @@
+ 
+ public class FloatActivity extends Activity {
+ 
+-    private static List<PermissionListener> mPermissionListenerList;
++    private static final int REQUEST_CODE = 1001;
+     private static PermissionListener mPermissionListener;
+ 
+-
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+@@ -34,53 +32,42 @@
+     private void requestAlertWindowPermission() {
+         Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+         intent.setData(Uri.parse("package:" + getPackageName()));
+-        startActivityForResult(intent, 756232212);
++        startActivityForResult(intent, REQUEST_CODE);
+     }
+-
+ 
+     @Override
+     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+         super.onActivityResult(requestCode, resultCode, data);
+-        if (requestCode == 756232212) {
++        if (requestCode == REQUEST_CODE) {
+             if (PermissionUtil.hasPermissionOnActivityResult(this)) {
+-                mPermissionListener.onSuccess();
++                if (mPermissionListener != null) {
++                    mPermissionListener.onSuccess();
++                }
+             } else {
+-                mPermissionListener.onFail();
++                if (mPermissionListener != null) {
++                    mPermissionListener.onFail();
++                }
+             }
+         }
+         finish();
+     }
+ 
++    @Override
++    protected void onDestroy() {
++        super.onDestroy();
++        mPermissionListener = null;
++    }
++
+     public static synchronized void request(Context context, PermissionListener permissionListener) {
+         if (PermissionUtil.hasPermission(context)) {
+-            permissionListener.onSuccess();
++            if (permissionListener != null) {
++                permissionListener.onSuccess();
++            }
+             return;
+         }
+-        if (mPermissionListenerList == null) {
+-            mPermissionListenerList = new ArrayList<>();
+-            mPermissionListener = new PermissionListener() {
+-                @Override
+-                public void onSuccess() {
+-                    for (PermissionListener listener : mPermissionListenerList) {
+-                        listener.onSuccess();
+-                    }
+-                    mPermissionListenerList.clear();
+-                }
+-
+-                @Override
+-                public void onFail() {
+-                    for (PermissionListener listener : mPermissionListenerList) {
+-                        listener.onFail();
+-                    }
+-                    mPermissionListenerList.clear();
+-                }
+-            };
+-            Intent intent = new Intent(context, FloatActivity.class);
+-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+-            context.startActivity(intent);
+-        }
+-        mPermissionListenerList.add(permissionListener);
++        FloatActivity.mPermissionListener = permissionListener;
++        Intent intent = new Intent(context, FloatActivity.class);
++        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
++        context.startActivity(intent);
+     }
+-
+-
+ }
+Index: sample/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- sample/build.gradle	(revision 504876ca88cb4d839d6f13e4dcf47a7fa0cd05d0)
++++ sample/build.gradle	(revision e0d91c238f7b42cff06390ca75dcf8238c51b8ec)
+@@ -18,6 +18,10 @@
+             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+         }
+     }
++    compileOptions {
++        sourceCompatibility JavaVersion.VERSION_1_8
++        targetCompatibility JavaVersion.VERSION_1_8
++    }
+ }
+ 
+ dependencies {
+Index: sample/src/main/java/com/example/yhao/floatwindow/BaseActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- sample/src/main/java/com/example/yhao/floatwindow/BaseActivity.java	(revision 504876ca88cb4d839d6f13e4dcf47a7fa0cd05d0)
++++ sample/src/main/java/com/example/yhao/floatwindow/BaseActivity.java	(revision e0d91c238f7b42cff06390ca75dcf8238c51b8ec)
+@@ -1,6 +1,7 @@
+ package com.example.yhao.floatwindow;
+ 
+ import androidx.appcompat.app.AppCompatActivity;
++
+ import android.os.Bundle;
+ 
+ import com.example.yhao.fixedfloatwindow.R;
+@@ -11,5 +12,6 @@
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_d);
++        FloatWindowUtils.showFloatWindow(this);
+     }
+ }
+Index: sample/src/main/java/com/example/yhao/floatwindow/BaseApplication.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- sample/src/main/java/com/example/yhao/floatwindow/BaseApplication.java	(revision 504876ca88cb4d839d6f13e4dcf47a7fa0cd05d0)
++++ sample/src/main/java/com/example/yhao/floatwindow/BaseApplication.java	(revision e0d91c238f7b42cff06390ca75dcf8238c51b8ec)
+@@ -1,18 +1,7 @@
+ package com.example.yhao.floatwindow;
+ 
+ import android.app.Application;
+-import android.util.Log;
+-import android.view.View;
+-import android.view.animation.BounceInterpolator;
+-import android.widget.ImageView;
+-import android.widget.Toast;
+-
+-import com.example.yhao.fixedfloatwindow.R;
+ import com.yhao.floatwindow.FloatWindow;
+-import com.yhao.floatwindow.MoveType;
+-import com.yhao.floatwindow.PermissionListener;
+-import com.yhao.floatwindow.Screen;
+-import com.yhao.floatwindow.ViewStateListener;
+ 
+ /**
+  * Created by yhao on 2017/12/18.
+@@ -21,87 +10,9 @@
+ 
+ public class BaseApplication extends Application {
+ 
+-    private static final String TAG = "BaseApplication";
+-
+     @Override
+     public void onCreate() {
+         super.onCreate();
+-
+         FloatWindow.initLifecycle(this);
+-
+-        ImageView imageView = new ImageView(getApplicationContext());
+-        imageView.setImageResource(R.drawable.icon);
+-
+-        FloatWindow
+-                .with(getApplicationContext())
+-                .setView(imageView)
+-                .setWidth(Screen.width, 0.2f) //设置悬浮控件宽高
+-                .setHeight(Screen.width, 0.2f)
+-                .setX(Screen.width, 0.8f)
+-                .setY(Screen.height, 0.3f)
+-                .setMoveType(MoveType.slide,100,-100)
+-                .setMoveStyle(500, new BounceInterpolator())
+-                .setFilter(true, A_Activity.class, C_Activity.class)
+-                .setViewStateListener(mViewStateListener)
+-                .setPermissionListener(mPermissionListener)
+-                .setDesktopShow(true)
+-                .build();
+-
+-
+-        imageView.setOnClickListener(new View.OnClickListener() {
+-            @Override
+-            public void onClick(View v) {
+-                Toast.makeText(BaseApplication.this, "onClick", Toast.LENGTH_SHORT).show();
+-            }
+-        });
+-    }
+-
+-    private PermissionListener mPermissionListener = new PermissionListener() {
+-        @Override
+-        public void onSuccess() {
+-            Log.d(TAG, "onSuccess");
+-        }
+-
+-        @Override
+-        public void onFail() {
+-            Log.d(TAG, "onFail");
+-        }
+-    };
+-
+-    private ViewStateListener mViewStateListener = new ViewStateListener() {
+-        @Override
+-        public void onPositionUpdate(int x, int y) {
+-            Log.d(TAG, "onPositionUpdate: x=" + x + " y=" + y);
+-        }
+-
+-        @Override
+-        public void onShow() {
+-            Log.d(TAG, "onShow");
+-        }
+-
+-        @Override
+-        public void onHide() {
+-            Log.d(TAG, "onHide");
+-        }
+-
+-        @Override
+-        public void onDismiss() {
+-            Log.d(TAG, "onDismiss");
+-        }
+-
+-        @Override
+-        public void onMoveAnimStart() {
+-            Log.d(TAG, "onMoveAnimStart");
+-        }
+-
+-        @Override
+-        public void onMoveAnimEnd() {
+-            Log.d(TAG, "onMoveAnimEnd");
+-        }
+-
+-        @Override
+-        public void onBackToDesktop() {
+-            Log.d(TAG, "onBackToDesktop");
+-        }
+-    };
++    }
+ }
+Index: sample/src/main/java/com/example/yhao/floatwindow/FloatWindowUtils.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- sample/src/main/java/com/example/yhao/floatwindow/FloatWindowUtils.java	(revision e0d91c238f7b42cff06390ca75dcf8238c51b8ec)
++++ sample/src/main/java/com/example/yhao/floatwindow/FloatWindowUtils.java	(revision e0d91c238f7b42cff06390ca75dcf8238c51b8ec)
+@@ -0,0 +1,138 @@
++package com.example.yhao.floatwindow;
++
++import android.app.AlertDialog;
++import android.content.Context;
++import android.content.DialogInterface;
++import android.util.Log;
++import android.view.View;
++import android.view.animation.BounceInterpolator;
++import android.widget.ImageView;
++import android.widget.Toast;
++
++import com.example.yhao.fixedfloatwindow.R;
++import com.yhao.floatwindow.FloatActivity;
++import com.yhao.floatwindow.FloatWindow;
++import com.yhao.floatwindow.MoveType;
++import com.yhao.floatwindow.PermissionListener;
++import com.yhao.floatwindow.PermissionUtil;
++import com.yhao.floatwindow.Screen;
++import com.yhao.floatwindow.ViewStateListener;
++
++public class FloatWindowUtils {
++
++    private static final String TAG = "FloatWindowUtils";
++
++    public static void showFloatWindow(final Context context) {
++        if (FloatWindow.get() != null) {
++            return;
++        }
++
++        //有浮窗权限
++        if (PermissionUtil.hasPermission(context)) {
++            showFloatWindow2(context);
++            return;
++        }
++
++        //权限弹窗
++        new AlertDialog.Builder(context)
++                .setTitle("权限")
++                .setMessage("需要全局浮窗权限")
++                .setPositiveButton("同意", (dialog, which) -> {
++                    //请求权限
++                    FloatActivity.request(context, new PermissionListener() {
++                        @Override
++                        public void onSuccess() {
++                            showFloatWindow2(context);
++                        }
++
++                        @Override
++                        public void onFail() {
++
++                        }
++                    });
++                })
++                .setNegativeButton("拒绝", (dialog, which) -> {
++
++                })
++                .show();
++    }
++
++    private static void showFloatWindow2(Context context) {
++        ImageView imageView = new ImageView(context);
++        imageView.setImageResource(R.drawable.icon);
++
++        FloatWindow
++                .with(context)
++                .setView(imageView)
++                //设置悬浮控件宽高
++                .setWidth(Screen.width, 0.2f)
++                .setHeight(Screen.width, 0.2f)
++                .setX(Screen.width, 0.8f)
++                .setY(Screen.height, 0.3f)
++                .setMoveType(MoveType.slide, 100, -100)
++                .setMoveStyle(500, new BounceInterpolator())
++                .setFilter(false, A_Activity.class)
++                .setViewStateListener(mViewStateListener)
++                .setPermissionListener(mPermissionListener)
++                .setDesktopShow(false)
++                //TODO:确保有浮窗权限才能Build
++                .build();
++
++        imageView.setOnClickListener(new View.OnClickListener() {
++            @Override
++            public void onClick(View v) {
++                Toast.makeText(v.getContext(), "onClick", Toast.LENGTH_SHORT).show();
++            }
++        });
++    }
++
++
++    private static PermissionListener mPermissionListener = new PermissionListener() {
++        @Override
++        public void onSuccess() {
++            Log.d(TAG, "onSuccess");
++        }
++
++        @Override
++        public void onFail() {
++            Log.d(TAG, "onFail");
++        }
++    };
++
++    private static ViewStateListener mViewStateListener = new ViewStateListener() {
++        @Override
++        public void onPositionUpdate(int x, int y) {
++            Log.d(TAG, "onPositionUpdate: x=" + x + " y=" + y);
++        }
++
++        @Override
++        public void onShow() {
++            Log.d(TAG, "onShow");
++        }
++
++        @Override
++        public void onHide() {
++            Log.d(TAG, "onHide");
++        }
++
++        @Override
++        public void onDismiss() {
++            Log.d(TAG, "onDismiss");
++        }
++
++        @Override
++        public void onMoveAnimStart() {
++            Log.d(TAG, "onMoveAnimStart");
++        }
++
++        @Override
++        public void onMoveAnimEnd() {
++            Log.d(TAG, "onMoveAnimEnd");
++        }
++
++        @Override
++        public void onBackToDesktop() {
++            Log.d(TAG, "onBackToDesktop");
++        }
++    };
++}
+\ No newline at end of file
+diff --git .idea/caches/build_file_checksums.ser .idea/caches/build_file_checksums.ser
+index 7ff20a1faeb0959dc2ef039d01aabe831ac1f180..98724bce8088856212b36bd1a85ec9dd8b259aa9
+GIT binary patch
+literal 593
+zc${1FmVvdnh`~NNKUXg?FQq6yGexf?KR>5fFEb@IQ7^qHF(oHeub?PDD>b=9F91S2
+zm1gFoxMk*~I%lLNXBU^|7Q2L-Ts|(GuF1r}<i#MFTj`TnT;dMa8(f)}9Fm!vT3nKt
+zTj0aMpIeEdv4nx&Co8cmQNOe#Ge_SyvB0{bfPsOr?4#uecA&ciL2`N^IX#cW;tZfX
+zEBmd3hs6>uGBYr_F>vMNC#JY1CYR(Fc`|U8WE7<qXXNLkR20}dFn|D0IR}sw0AltM
+z1`Ykt;?$yI{i=+_y!4!6eW>U35q>O4Eh@=OEiNr$V2XBH^I7}{8%M|kCI$wOlNbc9
+z$oAaqXV}E@vVn8Pn;%YfK&Ka{mXu`Xr58huDlKHFV_*ZRRre7QZE%gv6qWSeUH|gY
+zjS>c)Bv7DXC=@e_xYES9Xt&4KyNrx!r}9b|B+`JMDk;y*OUW<S$F8Zq>DkI;KKF|q
+z8$AL~Z?ybe!XS{7pPZP3><74Fj*D@Emjv_tX0voO>AjhAu7p9j7#I~mk7GAnet*ml
+q$76@qTANmf94weLy@Wv!Glbx(bKjUx>2li4rKr4NgXi4K8!G_!YR>)u
+
